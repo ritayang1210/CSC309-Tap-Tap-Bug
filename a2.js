@@ -1,7 +1,7 @@
 var canvasGame = document.getElementById("gameView");
 var ctx = canvasGame.getContext("2d");
 ctx.fillStyle = "lightgrey";
-ctx.fillRect(0,0,400,600);
+ctx.fillRect(0,0,400,680);
 
 var canvasInfor = document.getElementById("inforBar");
 
