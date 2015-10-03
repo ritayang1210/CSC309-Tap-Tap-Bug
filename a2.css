@@ -2,3 +2,37 @@ body {
     margin: 35% ;
     margin-top: 6%
 }
+
+#startView {
+    width : 400px;
+    height : 650px;
+    border:1px solid #c3c3c3;
+    background-color: lightgrey;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+table {
+    text-align: center;
+    margin: auto;
+    width: 250px;
+    height: 100px;
+    font-size: 20px;
+}
+
+#levelSelect {
+    width: 50em;
+    height: 50em;
+}
+
+#start {
+    margin-top:15%;
+    width: 200px;
+    height: 50px;
+    font-size: 30px;
+}
+
+#score {
+    font-size: 20px;
+}
