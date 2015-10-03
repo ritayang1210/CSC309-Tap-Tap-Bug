@@ -1,16 +1,28 @@
 body {
     margin: 35% ;
-    margin-top: 6%
+    margin-top: 8%
 }
 
 #startView {
     width : 400px;
-    height : 650px;
+    height : 600px;
     border:1px solid #c3c3c3;
     background-color: lightgrey;
     text-align: center;
     display: table-cell;
     vertical-align: middle;
+}
+
+#gameView {
+    width : 400px;
+    height : 600px;
+    border:1px solid #c3c3c3;
+}
+
+#inforBar {
+    width : 400px;
+    height : 80px;
+    border:1px solid #c3c3c3;
 }
 
 table {

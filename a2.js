@@ -1,7 +1,10 @@
-// var canvas = document.getElementById("startView");
-// var ctx = canvas.getContext("2d");
-// ctx.fillStyle = "lightgrey";
-// ctx.fillRect(0,0,400,650);
+var canvasGame = document.getElementById("gameView");
+var ctx = canvasGame.getContext("2d");
+ctx.fillStyle = "lightgrey";
+ctx.fillRect(0,0,400,600);
+
+var canvasInfor = document.getElementById("inforBar");
+
 
 
 function scoreCounter() {
@@ -20,7 +23,9 @@ function startGame() {
             alert("Please select game level!");
             return;
         }
+        window.location='game.html';
     } else {
         alert("Sorry! No Web Storage support");
     }
 }
+
