@@ -6,8 +6,6 @@ body {
 #startView {
     width : 400px;
     height : 680px;
-    /*border:1px solid #c3c3c3;*/
-    /*border-color: black;*/
     background-color: lightgrey;
     text-align: center;
     display: table-cell;
@@ -17,14 +15,11 @@ body {
 #gameView {
     width : 400px;
     height : 600px;
-    /*border:1px solid #c3c3c3;*/
-    /*border-color: black;*/
 }
 
 #inforBar {
     width : 394px;
     height : 74px;
-    /*border:1px solid #c3c3c3;*/
     border: 3px solid lightgrey;
 }
 
