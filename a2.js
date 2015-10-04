@@ -16,10 +16,8 @@ changeState();
 var color = 'black';
 var xCoord = canvasGame.width / 2;
 var yCoord = canvasGame.height / 2;
-drawBugs(xCoord, yCoord, color);
-
-
-
+var bugRot = 0;
+var bugfuc = setInterval(moveBugs, 10);
 
 function scoreCounter() {
     var highestScore = 2;
@@ -89,48 +87,67 @@ function drawResume() {
     ctxInfor.fill(path);
 }
 
-function drawBugs(xCoord, yCoord, color) {
+function drawBugs(xCoord, yCoord, color, rot) {
+    ctxGame.save();
+
     var path = new Path2D();
     ctxGame.fillStyle = color;
     ctxGame.strokeStyle = color;
 
-    path.arc(xCoord, yCoord, 4, 0, 2 * Math.PI, false);
-    path.ellipse(xCoord, yCoord + 17, 13, 3, 90 * Math.PI/180, 0, 2 * Math.PI);
+    ctxGame.translate(xCoord, yCoord);
+    ctxGame.rotate(rot);
+
+    path.arc(0, -17, 4, 0, 2 * Math.PI, false);
+    path.ellipse(0, 0, 13, 3, 90 * Math.PI/180, 0, 2 * Math.PI);
     ctxGame.fill(path);
 
     ctxGame.beginPath();
 
-    ctxGame.moveTo(xCoord, yCoord);
-    ctxGame.lineTo(xCoord - 5, yCoord - 10);
+    ctxGame.moveTo(0, -17);
+    ctxGame.lineTo(-5, -27);
 
-    ctxGame.moveTo(xCoord, yCoord);
-    ctxGame.lineTo(xCoord + 5, yCoord - 10);
+    ctxGame.moveTo(0, -17);
+    ctxGame.lineTo(5, -27);
 
-    ctxGame.moveTo(xCoord, yCoord + 14);
-    ctxGame.lineTo(xCoord + 5, yCoord + 7);
-    ctxGame.lineTo(xCoord + 6, yCoord + 2);
+    ctxGame.moveTo(0, -3);
+    ctxGame.lineTo(5, -10);
+    ctxGame.lineTo(6, -15);
 
-    ctxGame.moveTo(xCoord, yCoord + 14);
-    ctxGame.lineTo(xCoord - 5, yCoord + 7);
-    ctxGame.lineTo(xCoord - 6, yCoord + 2);
+    ctxGame.moveTo(0, -3);
+    ctxGame.lineTo(-5, -10);
+    ctxGame.lineTo(-6, -15);
 
-    ctxGame.moveTo(xCoord, yCoord + 13);
-    ctxGame.lineTo(xCoord + 5, yCoord + 13);
-    ctxGame.lineTo(xCoord + 5, yCoord + 16);
+    ctxGame.moveTo(0, -4);
+    ctxGame.lineTo(5, -4);
+    ctxGame.lineTo(5, -1);
 
-    ctxGame.moveTo(xCoord, yCoord + 13);
-    ctxGame.lineTo(xCoord - 5, yCoord + 13);
-    ctxGame.lineTo(xCoord - 5, yCoord + 16);
+    ctxGame.moveTo(0, -4);
+    ctxGame.lineTo(-5, -4);
+    ctxGame.lineTo(-5, -1);
 
-    ctxGame.moveTo(xCoord, yCoord + 14);
-    ctxGame.lineTo(xCoord + 5, yCoord + 20);
-    ctxGame.lineTo(xCoord + 6, yCoord + 25);
+    ctxGame.moveTo(0, -3);
+    ctxGame.lineTo(5, 3);
+    ctxGame.lineTo(6, 8);
 
-    ctxGame.moveTo(xCoord, yCoord + 14);
-    ctxGame.lineTo(xCoord - 5, yCoord + 20);
-    ctxGame.lineTo(xCoord - 6, yCoord + 25);
+    ctxGame.moveTo(0, -3);
+    ctxGame.lineTo(-5, 3);
+    ctxGame.lineTo(-6, 8);
 
     ctxGame.stroke();
+
+    ctxGame.restore();
+}
+
+function moveBugs(angle) {
+    ctxGame.save();
+    ctxGame.translate(xCoord, yCoord);
+    ctxGame.rotate(bugRot);
+    ctxGame.clearRect(-7, -28, 14, 42);
+    ctxGame.fillStyle = "lightgrey";
+    ctxGame.fillRect(-8, -29, 16, 44);
+    ctxGame.restore();
+    bugRot += 0.1;
+    drawBugs(xCoord, yCoord, "black", bugRot);
 }
 
 window.addEventListener("mousedown", doMouseDown, false);
