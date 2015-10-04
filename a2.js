@@ -1,7 +1,7 @@
 var canvasGame = document.getElementById("gameView");
-var ctx = canvasGame.getContext("2d");
-ctx.fillStyle = "lightgrey";
-ctx.fillRect(0,0,400,680);
+var ctxGame = canvasGame.getContext("2d");
+ctxGame.fillStyle = "lightgrey";
+ctxGame.fillRect(0,0,400,680);
 
 var canvasInfor = document.getElementById("inforBar");
 var ctxInfor = canvasInfor.getContext("2d");
@@ -13,10 +13,16 @@ var timerfuc = setInterval(drawTimer, 1000);
 var pause = false;
 changeState();
 
-var highestScore = 0;
-var score = 0;
+var xCoord = canvasGame.width / 2;
+var yCoord = canvasGame.height / 2;
+drawBugs(xCoord, yCoord);
+
+
+
 
 function scoreCounter() {
+    var highestScore = 2;
+    var score = 3;
     if (score >= highestScore) {
         localStorage.setItem("highestScore", score);
     }
@@ -80,6 +86,14 @@ function drawResume() {
     path.lineTo(145,110);
     path.lineTo(145,50);
     ctxInfor.fill(path);
+}
+
+function drawBugs(xCoord, yCoord) {
+    var path=new Path2D();
+    path.arc(xCoord, yCoord, 5, 0, 2 * Math.PI, false);
+    path.ellipse(xCoord, yCoord+20, 15, 3, 90 * Math.PI/180, 0, 2 * Math.PI);
+    ctxGame.fillStyle = 'black';
+    ctxGame.fill(path);
 }
 
 window.addEventListener("mousedown", doMouseDown, false);
