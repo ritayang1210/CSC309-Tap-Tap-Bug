@@ -13,9 +13,10 @@ var timerfuc = setInterval(drawTimer, 1000);
 var pause = false;
 changeState();
 
+var color = 'black';
 var xCoord = canvasGame.width / 2;
 var yCoord = canvasGame.height / 2;
-drawBugs(xCoord, yCoord);
+drawBugs(xCoord, yCoord, color);
 
 
 
@@ -88,12 +89,48 @@ function drawResume() {
     ctxInfor.fill(path);
 }
 
-function drawBugs(xCoord, yCoord) {
-    var path=new Path2D();
-    path.arc(xCoord, yCoord, 5, 0, 2 * Math.PI, false);
-    path.ellipse(xCoord, yCoord+20, 15, 3, 90 * Math.PI/180, 0, 2 * Math.PI);
-    ctxGame.fillStyle = 'black';
+function drawBugs(xCoord, yCoord, color) {
+    var path = new Path2D();
+    ctxGame.fillStyle = color;
+    ctxGame.strokeStyle = color;
+
+    path.arc(xCoord, yCoord, 4, 0, 2 * Math.PI, false);
+    path.ellipse(xCoord, yCoord + 17, 13, 3, 90 * Math.PI/180, 0, 2 * Math.PI);
     ctxGame.fill(path);
+
+    ctxGame.beginPath();
+
+    ctxGame.moveTo(xCoord, yCoord);
+    ctxGame.lineTo(xCoord - 5, yCoord - 10);
+
+    ctxGame.moveTo(xCoord, yCoord);
+    ctxGame.lineTo(xCoord + 5, yCoord - 10);
+
+    ctxGame.moveTo(xCoord, yCoord + 14);
+    ctxGame.lineTo(xCoord + 5, yCoord + 7);
+    ctxGame.lineTo(xCoord + 6, yCoord + 2);
+
+    ctxGame.moveTo(xCoord, yCoord + 14);
+    ctxGame.lineTo(xCoord - 5, yCoord + 7);
+    ctxGame.lineTo(xCoord - 6, yCoord + 2);
+
+    ctxGame.moveTo(xCoord, yCoord + 13);
+    ctxGame.lineTo(xCoord + 5, yCoord + 13);
+    ctxGame.lineTo(xCoord + 5, yCoord + 16);
+
+    ctxGame.moveTo(xCoord, yCoord + 13);
+    ctxGame.lineTo(xCoord - 5, yCoord + 13);
+    ctxGame.lineTo(xCoord - 5, yCoord + 16);
+
+    ctxGame.moveTo(xCoord, yCoord + 14);
+    ctxGame.lineTo(xCoord + 5, yCoord + 20);
+    ctxGame.lineTo(xCoord + 6, yCoord + 25);
+
+    ctxGame.moveTo(xCoord, yCoord + 14);
+    ctxGame.lineTo(xCoord - 5, yCoord + 20);
+    ctxGame.lineTo(xCoord - 6, yCoord + 25);
+
+    ctxGame.stroke();
 }
 
 window.addEventListener("mousedown", doMouseDown, false);
