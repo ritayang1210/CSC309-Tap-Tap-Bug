@@ -17,7 +17,8 @@ var color = 'black';
 var xCoord = canvasGame.width / 2;
 var yCoord = canvasGame.height / 2;
 var bugRot = 0;
-var bugfuc = setInterval(moveBugs, 10);
+var bugfuc = setInterval(moveBugs, 1000);
+drawFoods();
 
 function scoreCounter() {
     var highestScore = 2;
@@ -70,7 +71,6 @@ function changeState() {
 
 function drawPause() {
     ctxInfor.clearRect(100, 0, 100, 200);
-    var path=new Path2D();
     var rectangle = new Path2D();
     rectangle.rect(140, 50, 5, 60);
     rectangle.rect(150, 50, 5, 60);
@@ -149,6 +149,18 @@ function moveBugs(angle) {
     bugRot += 0.1;
     drawBugs(xCoord, yCoord, "black", bugRot);
 }
+
+function drawFoods() {
+    for (i=0; i<5; i++) {
+        var path = new Path2D();
+        var xCoord = Math.floor(Math.random() * (381) +10);
+        var yCoord = Math.floor(Math.random() * (461) +130);
+        path.arc(xCoord, yCoord, 10, 0, 2 * Math.PI, false);
+        ctxGame.fillStyle = "blue";
+        ctxGame.fill(path);
+    }
+}
+
 
 window.addEventListener("mousedown", doMouseDown, false);
 function doMouseDown(event) {
