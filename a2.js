@@ -1,7 +1,5 @@
 var canvasGame = document.getElementById("gameView");
 var ctxGame = canvasGame.getContext("2d");
-ctxGame.fillStyle = "lightgrey";
-ctxGame.fillRect(0,0,400,680);
 
 var canvasInfor = document.getElementById("inforBar");
 var ctxInfor = canvasInfor.getContext("2d");
@@ -18,6 +16,7 @@ var xCoord = canvasGame.width / 2;
 var yCoord = canvasGame.height / 2;
 var bugRot = 0;
 var bugfuc = setInterval(moveBugs, 1000);
+
 drawFoods();
 
 function scoreCounter() {
@@ -143,21 +142,20 @@ function moveBugs(angle) {
     ctxGame.translate(xCoord, yCoord);
     ctxGame.rotate(bugRot);
     ctxGame.clearRect(-7, -28, 14, 42);
-    ctxGame.fillStyle = "lightgrey";
-    ctxGame.fillRect(-8, -29, 16, 44);
     ctxGame.restore();
     bugRot += 0.1;
     drawBugs(xCoord, yCoord, "black", bugRot);
 }
 
 function drawFoods() {
-    for (i=0; i<5; i++) {
-        var path = new Path2D();
-        var xCoord = Math.floor(Math.random() * (381) +10);
-        var yCoord = Math.floor(Math.random() * (461) +130);
-        path.arc(xCoord, yCoord, 10, 0, 2 * Math.PI, false);
-        ctxGame.fillStyle = "blue";
-        ctxGame.fill(path);
+    var foodList = [];
+    for (i = 0; i < 5; i++) {
+        var newFood = new food();
+        while (newFood.overlapWith(foodList)) {
+            newFood = new food();
+        }
+        newFood.draw();
+        foodList.push(newFood);
     }
 }
 
@@ -169,4 +167,27 @@ function doMouseDown(event) {
   if (x>=190 && x<=220 && y>=27 && y<=60) {
      changeState();
   }
+}
+
+function food() {
+    this.xCoord = Math.floor(Math.random() * (381) + 10);
+    this.yCoord = Math.floor(Math.random() * (461) + 130);
+    this.eaten = false;
+
+    this.draw = function() {
+        var path = new Path2D();
+        path.arc(this.xCoord, this.yCoord, 10, 0, 2 * Math.PI, false);
+        ctxGame.fillStyle = "blue";
+        ctxGame.fill(path);
+    }
+
+    this.overlapWith = function(existingFoods) {
+        for (i = 0; i < existingFoods.length; i++) {
+            var existingFood = existingFoods[i]
+            if (Math.sqrt(Math.pow(this.xCoord - existingFood.xCoord, 2) + Math.pow(this.yCoord - existingFood.yCoord, 2)) <= 20) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

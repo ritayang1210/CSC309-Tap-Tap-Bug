@@ -10,13 +10,19 @@ body {
     text-align: center;
     display: table-cell;
     vertical-align: middle;
+    border: 3px solid black;
 }
 
 
 #inforBar {
-    width : 394px;
-    height : 74px;
-    border: 3px solid lightgrey;
+    width : 400px;
+    height : 71px;
+    border: 3px solid black;
+    border-bottom:  0px;
+}
+
+#gameView {
+    border : 3px solid black;
 }
 
 table {
