@@ -8,32 +8,16 @@ ctxInfor.font = "60px Courier New"
 var timer = 60;
 var timerfuc = setInterval(drawTimer, 1000);
 
-var pause = false;
+var resume = false;
 changeState();
 
-var color = 'black';
-var xCoord = canvasGame.width / 2;
-var yCoord = canvasGame.height / 2;
-var bugRot = 0;
-//var bugfuc = setInterval(moveBugs, 1000);
-
 var foodList = [];
-drawFoods();
+generateFoods();
+
 var newBug1 = new Bug();
-newBug1.draw();
-setInterval(function() { newBug1.move() }, 10);
-// var newBug2 = new Bug();
-// newBug2.draw();
-// setInterval(function() { newBug2.move() }, 10);
-// var newBug3 = new Bug();
-// newBug3.draw();
-// setInterval(function() { newBug3.move() }, 10);
-// var newBug4 = new Bug();
-// newBug4.draw();
-// setInterval(function() { newBug4.move() }, 10);
-// var newBug5 = new Bug();
-// newBug5.draw();
-// setInterval(function() { newBug5.move() }, 10);
+
+setInterval(function() { drawGame() }, 1);
+
 window.addEventListener("mousedown", doMouseDown, false);
 
 function scoreCounter() {
@@ -68,7 +52,7 @@ function drawTimer() {
         alert("Game Over");
         clearInterval(timerfuc);
         return;
-    } else if (pause==true) {
+    } else if (resume) {
         timer = timer - 1;
         ctxInfor.clearRect(0, 0, 100, 200);
         ctxInfor.fillText(timer + " sec", 10, 100, 50);
@@ -76,12 +60,12 @@ function drawTimer() {
 }
 
 function changeState() {
-    if (pause == false) {
+    if (!resume) {
         drawPause();
-        pause = true;
-    } else if (pause == true) {
+        resume = true;
+    } else if (resume) {
         drawResume();
-        pause = false;
+        resume = false;
     }
 }
 
@@ -115,10 +99,9 @@ function food() {
         ctxGame.fill(path);
     }
 
-    this.overlapWith = function(existingFoods) {
-        for (i = 0; i < existingFoods.length; i++) {
-            var existingFood = existingFoods[i]
-            if (Math.sqrt(Math.pow(this.xCoord - existingFood.xCoord, 2) + Math.pow(this.yCoord - existingFood.yCoord, 2)) <= 20) {
+    this.overlapWith = function() {
+        for (i = 0; i < foodList.length; i++) {
+            if (Math.sqrt(Math.pow(this.xCoord - foodList[i].xCoord, 2) + Math.pow(this.yCoord - foodList[i].yCoord, 2)) <= 20) {
                 return true;
             }
         }
@@ -126,26 +109,39 @@ function food() {
     }
 }
 
-function drawFoods() {
+function drawGame() {
+    if (!resume) {
+        return;
+    }
+    ctxGame.clearRect(0, 0, 400, 600);
+
+    for (i = 0; i < foodList.length; i++) {
+        if (!foodList[i].eaten) {
+            foodList[i].draw();
+        }
+    }
+
+    newBug1.move();
+}
+
+function generateFoods() {
     for (i = 0; i < 5; i++) {
         var newFood = new food();
-        while (newFood.overlapWith(foodList)) {
+        while (newFood.overlapWith()) {
             newFood = new food();
         }
-        newFood.draw();
         foodList.push(newFood);
     }
 }
 
 function Bug() {
-    "use strict";
     var alive = true;
-    this.xCoord = Math.floor(Math.random() * 400);
+    this.xCoord = Math.floor(Math.random() * (381) + 10);
     this.yCoord = 0;
 
     this.findNearestFood = function() {
         var minDist = Number.MAX_VALUE;
-        var result = null;
+        var result;
         for (i = 0; i < foodList.length; i++) {
             var food = foodList[i];
             var dist = Math.sqrt(Math.pow(this.xCoord - food.xCoord, 2) + Math.pow(this.yCoord - food.yCoord, 2));
@@ -176,11 +172,21 @@ function Bug() {
         } else if (result < 0) {
             result += 2 * Math.PI;
         }
-
         return result;
     }
 
+    this.getSpeed = function() {
+        if (this.color == "black") {
+            return 1.5;
+        } else if (this.color == "red") {
+            return 0.75;
+        } else if (this.color == "orange") {
+            return 0.6;
+        }
+    }
+
     this.color = this.chooseColor();
+    this.speed = this.getSpeed();
     this.targetFood = this.findNearestFood();
     this.direction = this.getDirection();
 
@@ -237,25 +243,19 @@ function Bug() {
 
     this.move = function() {
         this.targetFood = this.findNearestFood();
-        if (Math.abs(this.targetFood.yCoord - this.yCoord) < 1 && Math.abs(this.targetFood.xCoord - this.xCoord) < 1) {
+        if (Math.abs(this.targetFood.yCoord - this.yCoord) < 10 && Math.abs(this.targetFood.xCoord - this.xCoord) < 10) {
             this.targetFood.eaten = true;
         }
         var rightDirection = this.getDirection();
-        if (Math.abs(this.direction - rightDirection) > 0.001) {
+        if (Math.abs(this.direction - rightDirection) > 0.1) {
             this.direction += ((rightDirection - this.direction) / 10);
         } else {
-            this.xCoord += Math.sin(this.direction);
-            this.yCoord -= Math.cos(this.direction);
+            this.xCoord += (Math.sin(this.direction) * this.speed);
+            this.yCoord -= (Math.cos(this.direction) * this.speed);
         }
-        ctxGame.save();
-        ctxGame.translate(this.xCoord, this.yCoord);
-        ctxGame.rotate(this.direction);
-        ctxGame.clearRect(-7, -28, 14, 42);
-        ctxGame.restore();
         this.draw();
     }
 }
-
 function doMouseDown(event) {
   x = event.pageX - canvasInfor.offsetLeft;
   y = event.pageY - canvasInfor.offsetTop;
@@ -263,4 +263,23 @@ function doMouseDown(event) {
      changeState();
   }
 }
+
+// function doMouseDown(event) {
+//   x = event.pageX +canvasInfor.offsetLeft;
+//   y = event.pageY + canvasInfor.offsetTop;
+//   if (Math.sqrt((newBug1.xCoord-x)^2 + (newBug1.yCoord-y)^2)<=30) {
+//      arert("die");
+//   }
+// }
+
+canvasGame.addEventListener('mousedown', function(evt) {
+
+    mousePos = getMousePos(canvasGame, evt);
+    var distance = Math.sqrt( Math.pow((mousePos.x - newBug1.xCoord), 2) + Math.pow((mousePos.y - newBug1.yCoord), 2) ) ;
+
+    if (distance <= 30 && distance >= 0) {
+        alert('clicked on the circle');
+    }
+
+}, false);  
 
