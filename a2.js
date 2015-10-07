@@ -19,9 +19,21 @@ var bugRot = 0;
 
 var foodList = [];
 drawFoods();
-var newBug = new Bug();
-newBug.draw();
-setInterval(function() { newBug.move() }, 100);
+var newBug1 = new Bug();
+newBug1.draw();
+setInterval(function() { newBug1.move() }, 10);
+// var newBug2 = new Bug();
+// newBug2.draw();
+// setInterval(function() { newBug2.move() }, 10);
+// var newBug3 = new Bug();
+// newBug3.draw();
+// setInterval(function() { newBug3.move() }, 10);
+// var newBug4 = new Bug();
+// newBug4.draw();
+// setInterval(function() { newBug4.move() }, 10);
+// var newBug5 = new Bug();
+// newBug5.draw();
+// setInterval(function() { newBug5.move() }, 10);
 window.addEventListener("mousedown", doMouseDown, false);
 
 function scoreCounter() {
@@ -125,10 +137,6 @@ function drawFoods() {
     }
 }
 
-function removeFoods() {
-    //TODO
-}
-
 function Bug() {
     "use strict";
     var alive = true;
@@ -141,7 +149,7 @@ function Bug() {
         for (i = 0; i < foodList.length; i++) {
             var food = foodList[i];
             var dist = Math.sqrt(Math.pow(this.xCoord - food.xCoord, 2) + Math.pow(this.yCoord - food.yCoord, 2));
-            if (food.eaton == false && dist < minDist) {
+            if (!food.eaten && dist < minDist) {
                 result = food;
                 minDist = dist;
             }
@@ -162,7 +170,14 @@ function Bug() {
     }
 
     this.getDirection = function() {
-        return Math.atan2(this.targetFood.yCoord - this.yCoord, this.targetFood.xCoord - this.xCoord) + Math.PI / 2;
+        var result = Math.atan2(this.targetFood.yCoord - this.yCoord, this.targetFood.xCoord - this.xCoord) + Math.PI / 2;
+        if (result > 2 * Math.PI) {
+            result -= 2 * Math.PI
+        } else if (result < 0) {
+            result += 2 * Math.PI;
+        }
+
+        return result;
     }
 
     this.color = this.chooseColor();
@@ -209,7 +224,7 @@ function Bug() {
         ctxGame.lineTo(-5, -1);
 
         ctxGame.moveTo(0, -3);
-        ctxGame.lineTo(5, 3);
+        ctxGame.lineTo(5, 3)
         ctxGame.lineTo(6, 8);
 
         ctxGame.moveTo(0, -3);
@@ -222,12 +237,15 @@ function Bug() {
 
     this.move = function() {
         this.targetFood = this.findNearestFood();
+        if (Math.abs(this.targetFood.yCoord - this.yCoord) < 1 && Math.abs(this.targetFood.xCoord - this.xCoord) < 1) {
+            this.targetFood.eaten = true;
+        }
         var rightDirection = this.getDirection();
-        if (this.direction - rightDirection > 0.01) {
-            this.direction += ((rightDirection - this.direction) / 2);
+        if (Math.abs(this.direction - rightDirection) > 0.001) {
+            this.direction += ((rightDirection - this.direction) / 10);
         } else {
-            this.xCoord += 10 * Math.sin(this.direction);
-            this.yCoord -= 10 * Math.cos(this.direction);
+            this.xCoord += Math.sin(this.direction);
+            this.yCoord -= Math.cos(this.direction);
         }
         ctxGame.save();
         ctxGame.translate(this.xCoord, this.yCoord);
