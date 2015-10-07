@@ -115,13 +115,16 @@ function drawGame() {
     }
     ctxGame.clearRect(0, 0, 400, 600);
 
+
     for (i = 0; i < foodList.length; i++) {
         if (!foodList[i].eaten) {
             foodList[i].draw();
         }
     }
-
-    newBug1.move();
+    if (newBug1.alive) {
+        newBug1.move();
+    }
+    
 }
 
 function generateFoods() {
@@ -264,22 +267,15 @@ function doMouseDown(event) {
   }
 }
 
-// function doMouseDown(event) {
-//   x = event.pageX +canvasInfor.offsetLeft;
-//   y = event.pageY + canvasInfor.offsetTop;
-//   if (Math.sqrt((newBug1.xCoord-x)^2 + (newBug1.yCoord-y)^2)<=30) {
-//      arert("die");
-//   }
-// }
 
 canvasGame.addEventListener('mousedown', function(evt) {
+    x = evt.pageX - canvasGame.offsetLeft;
+    y = evt.pageY - canvasGame.offsetTop;
+    var dist = Math.sqrt( Math.pow((x - newBug1.xCoord), 2) + Math.pow((y- newBug1.yCoord), 2) ) ;
+    if (dist <= 30){
+        newBug1.alive=false;
+    } 
+}
 
-    mousePos = getMousePos(canvasGame, evt);
-    var distance = Math.sqrt( Math.pow((mousePos.x - newBug1.xCoord), 2) + Math.pow((mousePos.y - newBug1.yCoord), 2) ) ;
-
-    if (distance <= 30 && distance >= 0) {
-        alert('clicked on the circle');
-    }
-
-}, false);  
+, false);  
 
