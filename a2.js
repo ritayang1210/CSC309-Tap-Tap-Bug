@@ -114,17 +114,17 @@ function drawGame() {
         return;
     }
     ctxGame.clearRect(0, 0, 400, 600);
-
-
     for (i = 0; i < foodList.length; i++) {
         if (!foodList[i].eaten) {
             foodList[i].draw();
         }
     }
-    if (newBug1.alive) {
-        newBug1.move();
+   if (newBug1.alive) {
+            newBug1.move();
+        }
+    else {
+        return;
     }
-    
 }
 
 function generateFoods() {
@@ -138,7 +138,7 @@ function generateFoods() {
 }
 
 function Bug() {
-    var alive = true;
+    this.alive = true;
     this.xCoord = Math.floor(Math.random() * (381) + 10);
     this.yCoord = 0;
 
@@ -271,11 +271,9 @@ function doMouseDown(event) {
 canvasGame.addEventListener('mousedown', function(evt) {
     x = evt.pageX - canvasGame.offsetLeft;
     y = evt.pageY - canvasGame.offsetTop;
-    var dist = Math.sqrt( Math.pow((x - newBug1.xCoord), 2) + Math.pow((y- newBug1.yCoord), 2) ) ;
+    var dist = Math.sqrt( Math.pow((x - newBug1.xCoord), 2) + Math.pow((y- newBug1.yCoord), 2));
     if (dist <= 30){
         newBug1.alive=false;
     } 
-}
-
-, false);  
+}, false);  
 
