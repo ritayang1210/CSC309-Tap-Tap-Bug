@@ -7,27 +7,22 @@ ctxInfor.font = "60px Courier New"
 
 var timer = 60;
 var timerfuc = setInterval(drawTimer, 1000);
+setInterval(drawScore, 100);
 
 var resume = false;
 changeState();
 
+var foodCounter;
 var foodList = [];
+
 generateFoods();
+var bugAppear = 0;
+var bugList = [];
 
-var newBug1 = new Bug();
+var gameView = setInterval(function() { drawGameView() }, 1);
 
-setInterval(function() { drawGame() }, 1);
-
-window.addEventListener("mousedown", doMouseDown, false);
-
-function scoreCounter() {
-    var highestScore = 2;
-    var score = 3;
-    if (score >= highestScore) {
-        localStorage.setItem("highestScore", score);
-    }
-    document.getElementById("scoreCounter").textContent = localStorage.getItem("highestScore");
-}
+var curScore = 0;
+localStorage.setItem("highestScore", 0);
 
 function startGame() {
     var level1 = document.getElementById("level1");
@@ -41,18 +36,19 @@ function startGame() {
             alert("Please select game level!");
             return;
         }
-        window.location='game.html';
+        window.location = 'game.html';
     } else {
         alert("Sorry! No Web Storage support");
     }
 }
 
+function drawScore() {
+    ctxInfor.clearRect(240, 0, 100, 200);
+    ctxInfor.fillText("Score: " + curScore, 240, 100, 50);
+}
+
 function drawTimer() {
-    if (timer == 0) {
-        alert("Game Over");
-        clearInterval(timerfuc);
-        return;
-    } else if (resume) {
+    if (timer >= 0 && resume) {
         timer = timer - 1;
         ctxInfor.clearRect(0, 0, 100, 200);
         ctxInfor.fillText(timer + " sec", 10, 100, 50);
@@ -80,11 +76,57 @@ function drawPause() {
 function drawResume() {
     ctxInfor.clearRect(100, 0, 100, 200);
 
-    var path=new Path2D();
+    var path = new Path2D();
     path.moveTo(160,80);
     path.lineTo(145,110);
     path.lineTo(145,50);
     ctxInfor.fill(path);
+}
+
+function drawGameView() {
+    if (!resume) {
+        return;
+    }
+
+    ctxGame.clearRect(0, 0, 400, 600);
+
+    if (foodCounter == 0) {
+        clearInterval(gameView);
+        clearInterval(timerfuc);
+        if (curScore > localStorage.getItem("highestScore")) {
+            localStorage.setItem("highestScore", curScore);
+        }
+        alert("Game Over\nScore: " + curScore);
+        return;
+    }
+
+    bugAppear -= 10;
+    if (bugAppear <= 0) {
+        bugList.push(new Bug());
+        bugAppear = Math.random() * 3000;
+    }
+
+    for (i = 0; i < foodList.length; i++) {
+        if (!foodList[i].eaten) {
+            foodList[i].draw();
+        }
+    }
+
+    for (j = 0; j < bugList.length; j++) {
+        var bug = bugList[j];
+        bug.move();
+    }
+}
+
+function generateFoods() {
+    for (i = 0; i < 5; i++) {
+        var newFood = new food();
+        while (newFood.overlapWith()) {
+            newFood = new food();
+        }
+        foodList.push(newFood);
+    }
+    foodCounter = 5;
 }
 
 function food() {
@@ -109,38 +151,11 @@ function food() {
     }
 }
 
-function drawGame() {
-    if (!resume) {
-        return;
-    }
-    ctxGame.clearRect(0, 0, 400, 600);
-    for (i = 0; i < foodList.length; i++) {
-        if (!foodList[i].eaten) {
-            foodList[i].draw();
-        }
-    }
-   if (newBug1.alive) {
-            newBug1.move();
-        }
-    else {
-        return;
-    }
-}
-
-function generateFoods() {
-    for (i = 0; i < 5; i++) {
-        var newFood = new food();
-        while (newFood.overlapWith()) {
-            newFood = new food();
-        }
-        foodList.push(newFood);
-    }
-}
-
 function Bug() {
     this.alive = true;
     this.xCoord = Math.floor(Math.random() * (381) + 10);
     this.yCoord = 0;
+    this.opacity = 1;
 
     this.findNearestFood = function() {
         var minDist = Number.MAX_VALUE;
@@ -180,26 +195,49 @@ function Bug() {
 
     this.getSpeed = function() {
         if (this.color == "black") {
-            return 1.5;
+            if (localStorage.getItem("levelSelect") == "level2") {
+                return 2.0;
+            } else {
+                return 1.5;
+            }
         } else if (this.color == "red") {
-            return 0.75;
+            if (localStorage.getItem("levelSelect") == "level2") {
+                return 1.0;
+            } else {
+                return 0.75;
+            }
         } else if (this.color == "orange") {
-            return 0.6;
+            if (localStorage.getItem("levelSelect") == "level2") {
+                return 0.8;
+            } else {
+                return 0.6;
+            }
+        }
+    }
+
+    this.getScore = function() {
+        if (this.color == "black") {
+            return 5;
+        } else if (this.color == "red") {
+            return 3;
+        } else if (this.color == "orange") {
+            return 1;
         }
     }
 
     this.color = this.chooseColor();
     this.speed = this.getSpeed();
+    this.score = this.getScore();
     this.targetFood = this.findNearestFood();
     this.direction = this.getDirection();
 
     this.draw = function() {
         ctxGame.save();
         var path = new Path2D();
-        
 
         ctxGame.fillStyle = this.color;
         ctxGame.strokeStyle = this.color;
+        ctxGame.globalAlpha = this.opacity;
 
         ctxGame.translate(this.xCoord, this.yCoord);
         ctxGame.rotate(this.direction);
@@ -245,20 +283,29 @@ function Bug() {
     }
 
     this.move = function() {
-        this.targetFood = this.findNearestFood();
-        if (Math.abs(this.targetFood.yCoord - this.yCoord) < 10 && Math.abs(this.targetFood.xCoord - this.xCoord) < 10) {
-            this.targetFood.eaten = true;
-        }
-        var rightDirection = this.getDirection();
-        if (Math.abs(this.direction - rightDirection) > 0.1) {
-            this.direction += ((rightDirection - this.direction) / 10);
+        if (this.alive) {
+            this.targetFood = this.findNearestFood();
+            if (Math.abs(this.targetFood.yCoord - this.yCoord) < 10 && Math.abs(this.targetFood.xCoord - this.xCoord) < 10) {
+                this.targetFood.eaten = true;
+                foodCounter--;
+            }
+            var rightDirection = this.getDirection();
+            if (Math.abs(this.direction - rightDirection) > 0.1) {
+                this.direction += ((rightDirection - this.direction) / 10);
+            } else {
+                this.xCoord += (Math.sin(this.direction) * this.speed);
+                this.yCoord -= (Math.cos(this.direction) * this.speed);
+            }
         } else {
-            this.xCoord += (Math.sin(this.direction) * this.speed);
-            this.yCoord -= (Math.cos(this.direction) * this.speed);
+            if (this.opacity > 0.005) {
+                this.opacity -= 0.005;
+            }
         }
         this.draw();
     }
 }
+
+window.addEventListener("mousedown", doMouseDown, false);
 function doMouseDown(event) {
   x = event.pageX - canvasInfor.offsetLeft;
   y = event.pageY - canvasInfor.offsetTop;
@@ -267,13 +314,18 @@ function doMouseDown(event) {
   }
 }
 
-
 canvasGame.addEventListener('mousedown', function(evt) {
     x = evt.pageX - canvasGame.offsetLeft;
     y = evt.pageY - canvasGame.offsetTop;
-    var dist = Math.sqrt( Math.pow((x - newBug1.xCoord), 2) + Math.pow((y- newBug1.yCoord), 2));
-    if (dist <= 30){
-        newBug1.alive=false;
-    } 
-}, false);  
+    for (i = 0; i < bugList.length; i++) {
+        var bug = bugList[i];
+        if (bug.alive) {
+            var dist = Math.sqrt( Math.pow((x - bug.xCoord), 2) + Math.pow((y- bug.yCoord), 2) ) ;
+            if (dist <= 30){
+                bug.alive = false;
+                curScore += bug.score;
+            } 
+        }
+    }
+}, false); 
 
