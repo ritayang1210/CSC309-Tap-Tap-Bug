@@ -3,26 +3,36 @@ var ctxGame = canvasGame.getContext("2d");
 
 var canvasInfor = document.getElementById("inforBar");
 var ctxInfor = canvasInfor.getContext("2d");
-ctxInfor.font = "60px Courier New"
+ctxInfor.font = "60px Courier New";
 
-var timer = 60;
-var timerfuc = setInterval(drawTimer, 1000);
+var timer;
+var timerFunc;
 setInterval(drawScore, 100);
-
-var resume = false;
-changeState();
-
+var resume;
 var foodCounter;
-var foodList = [];
+var gameView;
+var bugAppear;
+var foodList;
+var bugList;
+var curScore;
 
-generateFoods();
-var bugAppear = 0;
-var bugList = [];
-
-var gameView = setInterval(function() { drawGameView() }, 1);
-
-var curScore = 0;
 localStorage.setItem("highestScore", 0);
+gameStart();
+
+function gameStart() {
+    window.removeEventListener('click', drawRestart.restart, false);
+    window.removeEventListener('click', drawExit.exit, false);
+    foodList = [];
+    bugList = [];
+    timer = 10;
+    bugAppear = 0
+    curScore = 0
+    resume = false;
+    changeState();
+    generateFoods();
+    timerFunc = setInterval(drawTimer, 1000);
+    gameView = setInterval(function() { drawGameView() }, 1);
+}
 
 function startGame() {
     var level1 = document.getElementById("level1");
@@ -48,10 +58,15 @@ function drawScore() {
 }
 
 function drawTimer() {
-    if (timer >= 0 && resume) {
+    if (timer > 0 && resume) {
         timer = timer - 1;
         ctxInfor.clearRect(0, 0, 100, 200);
         ctxInfor.fillText(timer + " sec", 10, 100, 50);
+    } else if (timer == 0) {
+        if (curScore > localStorage.getItem("highestScore")) {
+            localStorage.setItem("highestScore", curScore);
+        }
+        gameOver(true);
     }
 }
 
@@ -91,12 +106,8 @@ function drawGameView() {
     ctxGame.clearRect(0, 0, 400, 600);
 
     if (foodCounter == 0) {
-        clearInterval(gameView);
-        clearInterval(timerfuc);
-        if (curScore > localStorage.getItem("highestScore")) {
-            localStorage.setItem("highestScore", curScore);
-        }
-        alert("Game Over\nScore: " + curScore);
+        gameOver(false);
+
         return;
     }
 
@@ -115,6 +126,96 @@ function drawGameView() {
     for (j = 0; j < bugList.length; j++) {
         var bug = bugList[j];
         bug.move();
+    }
+
+    for (i = 0; i < bugList.length; i++) {
+        var bug1 = bugList[i];
+        for (j = i + 1; j < bugList.length; j++) {
+            var bug2 = bugList[j];
+            if (bug1.alive && bug2.alive && calcDist(bug1.xCoord, bug1.yCoord, bug2.xCoord, bug2.yCoord) <= 40) {
+                if (bug1.speed < bug2.speed) {
+                    bug1.moveBack();
+                } else if (bug2.speed < bug1.speed) {
+                    bug2.moveBack();
+                } else {
+                    if (bug1.xCoord < bug2.xCoord) {
+                        bug1.moveBack();
+                    } else {
+                        bug2.moveBack();
+                    }
+                }
+            }
+        }
+    }
+
+    for (j = 0; j < bugList.length; j++) {
+        var bug = bugList[j];
+        bug.draw();
+    }
+}
+
+function gameOver(win) {
+    clearInterval(gameView);
+    clearInterval(timerFunc);
+    curScore = 0;
+
+    ctxGame.clearRect(0, 0, 400, 600);
+
+    if (win) {
+        if (localStorage.getItem("levelSelect") == "level1") {
+            localStorage.setItem("levelSelect", "level2");
+            gameStart();
+            return;
+        }
+    }
+    var level;
+    if (win && localStorage.getItem("levelSelect") == "level2") {
+        level = "level1";
+    } else {
+        level = localStorage.getItem("levelSelect");
+    }
+    drawRestart(level);
+    drawExit();
+}
+
+function drawRestart(level) {
+    ctxGame.save();
+    ctxGame.font = "60px Courier New";
+    ctxGame.fillStyle = "black";
+    ctxGame.fillText("Restart", 110, 225, 180);
+    var rectangle = new Path2D();
+    rectangle.rect(100, 180, 200, 60);
+    ctxGame.stroke(rectangle);
+    ctxGame.restore();
+
+    window.addEventListener("click", restart, false);
+    function restart(event) {
+        x = event.pageX - canvasGame.offsetLeft;
+        y = event.pageY - canvasGame.offsetTop;
+        if (x >= 100 && x <= 300 && y >= 180 && y <= 240) {
+            localStorage.setItem("levelSelect", level);
+            gameStart();
+        }
+    }
+}
+
+function drawExit() {
+    ctxGame.save();
+    ctxGame.font = "60px Courier New";
+    ctxGame.fillStyle = "black";
+    ctxGame.fillText("Exit", 110, 325, 180);
+    var rectangle = new Path2D();
+    rectangle.rect(100, 280, 200, 60);
+    ctxGame.stroke(rectangle);
+    ctxGame.restore();
+
+    window.addEventListener("click", exit, false);
+    function exit(event) {
+        x = event.pageX - canvasGame.offsetLeft;
+        y = event.pageY - canvasGame.offsetTop;
+        if (x >= 100 && x <= 300 && y >= 280 && y <= 340) {
+            window.location = "a2.html";
+        }
     }
 }
 
@@ -156,13 +257,19 @@ function Bug() {
     this.xCoord = Math.floor(Math.random() * (381) + 10);
     this.yCoord = 0;
     this.opacity = 1;
+    this.lastMoveType;
+    this.lastRot;
+    this.lastMoveX;
+    this.lastMoveY;
+    this.width = 16;
+    this.height = 44;
 
     this.findNearestFood = function() {
         var minDist = Number.MAX_VALUE;
         var result;
         for (i = 0; i < foodList.length; i++) {
             var food = foodList[i];
-            var dist = Math.sqrt(Math.pow(this.xCoord - food.xCoord, 2) + Math.pow(this.yCoord - food.yCoord, 2));
+            var dist = calcDist(this.xCoord, this.yCoord, food.xCoord, food.yCoord);
             if (!food.eaten && dist < minDist) {
                 result = food;
                 minDist = dist;
@@ -196,13 +303,13 @@ function Bug() {
     this.getSpeed = function() {
         if (this.color == "black") {
             if (localStorage.getItem("levelSelect") == "level2") {
-                return 2.0;
+                return 2;
             } else {
                 return 1.5;
             }
         } else if (this.color == "red") {
             if (localStorage.getItem("levelSelect") == "level2") {
-                return 1.0;
+                return 1;
             } else {
                 return 0.75;
             }
@@ -285,27 +392,50 @@ function Bug() {
     this.move = function() {
         if (this.alive) {
             this.targetFood = this.findNearestFood();
-            if (Math.abs(this.targetFood.yCoord - this.yCoord) < 10 && Math.abs(this.targetFood.xCoord - this.xCoord) < 10) {
+            if (this.targetFood == null) {
+                return;
+            }
+            if (calcDist(this.xCoord, this.yCoord, this.targetFood.xCoord, this.targetFood.yCoord) < 10) {
                 this.targetFood.eaten = true;
                 foodCounter--;
             }
             var rightDirection = this.getDirection();
             if (Math.abs(this.direction - rightDirection) > 0.1) {
-                this.direction += ((rightDirection - this.direction) / 10);
+                this.lastMoveType = "rotation";
+                this.lastRot = ((rightDirection - this.direction) / 10);
+                this.direction += this.lastRot;
             } else {
-                this.xCoord += (Math.sin(this.direction) * this.speed);
-                this.yCoord -= (Math.cos(this.direction) * this.speed);
+                this.lastMoveType = "forward";
+                this.lastMoveX = (Math.sin(this.direction) * this.speed)
+                this.lastMoveY = -(Math.cos(this.direction) * this.speed)
+                this.xCoord += this.lastMoveX;
+                this.yCoord += this.lastMoveY;
             }
         } else {
             if (this.opacity > 0.005) {
                 this.opacity -= 0.005;
             }
         }
-        this.draw();
+    }
+
+    this.moveBack = function() {
+        if (this.lastMoveType == "rotation") {
+            this.direction -= this.lastRot;
+            this.lastRot = 0;
+        } else if (this.lastMoveType == "forward") {
+            this.xCoord -= this.lastMoveX;
+            this.yCoord -= this.lastMoveY;
+            this.lastMoveX = 0;
+            this.lastMoveY = 0;
+        }
     }
 }
 
-window.addEventListener("mousedown", doMouseDown, false);
+function calcDist(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+}
+
+window.addEventListener("click", doMouseDown, false);
 function doMouseDown(event) {
   x = event.pageX - canvasInfor.offsetLeft;
   y = event.pageY - canvasInfor.offsetTop;
@@ -314,7 +444,7 @@ function doMouseDown(event) {
   }
 }
 
-canvasGame.addEventListener('mousedown', function(evt) {
+canvasGame.addEventListener('click', function(evt) {
     x = evt.pageX - canvasGame.offsetLeft;
     y = evt.pageY - canvasGame.offsetTop;
     for (i = 0; i < bugList.length; i++) {
