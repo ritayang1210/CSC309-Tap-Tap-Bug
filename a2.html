@@ -5,16 +5,16 @@
         <link rel="stylesheet" type="text/css" href="a2.css" />
         <script language="javascript" type="text/javascript" src="a2.js"></script>
     </HEAD>
-    <BODY>
+    <BODY onload="loadMaxAndSelectLevel()">
         <div id="startView">
             <table>
                 <tr>
                     <td>Level:</td>
                     <td>
-                        <input id="level1" type="radio" name="levelSelect" value="level1"></input>
+                        <input id="level1" type="radio" name="levelSelect" value="level1" onchange="loadMaxAndSelectLevel()" checked="checked"></input>
                     </td>
                     <td>
-                        <input id="level2" type="radio" name="levelSelect" value="level2"></input>
+                        <input id="level2" type="radio" name="levelSelect" value="level2" onchange="loadMaxAndSelectLevel()"></input>
                     </td>
                 </tr>
                 <tr>

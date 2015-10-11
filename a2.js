@@ -15,37 +15,51 @@ var bugAppear;
 var foodList;
 var bugList;
 var curScore;
+var beginningTimer;
+var beginning;
 
-localStorage.setItem("highestScore", 0);
 gameStart();
 
 function gameStart() {
-    window.removeEventListener('click', drawRestart.restart, false);
-    window.removeEventListener('click', drawExit.exit, false);
     foodList = [];
     bugList = [];
-    timer = 10;
+    timer = 60;
     bugAppear = 0
     curScore = 0
     resume = false;
-    changeState();
+    beginningTimer = 4;
+    beginning = setInterval(drawBeginning, 1000);
     generateFoods();
     timerFunc = setInterval(drawTimer, 1000);
     gameView = setInterval(function() { drawGameView() }, 1);
+}
+
+function drawBeginning() {
+    if (beginningTimer >= 0) {
+        ctxGame.clearRect(0, 0, 400, 600);
+        ctxGame.save();
+        ctxGame.font = "60px Courier New";
+        ctxGame.fillStyle = "black";
+        if (beginningTimer == 4) {
+            var level = localStorage.getItem("levelSelect") == "level1" ? 1 : 2;
+            ctxGame.fillText("level " + level, 110, 225, 180);
+        } else if (beginningTimer > 0) {
+            ctxGame.fillText(beginningTimer, 180, 225, 180);
+        } else {
+            ctxGame.fillText("GO!", 160, 225, 180);
+        }
+        ctxGame.restore();
+        beginningTimer--;
+    } else {
+        changeState();
+        clearInterval(beginning);
+    }
 }
 
 function startGame() {
     var level1 = document.getElementById("level1");
     var level2 = document.getElementById("level2");
     if (typeof(Storage) !== "undefined") {
-        if (level1.checked) {
-            localStorage.setItem("levelSelect", level1.value);
-        } else if (level2.checked) {
-            localStorage.setItem("levelSelect", level2.value);
-        } else {
-            alert("Please select game level!");
-            return;
-        }
         window.location = 'game.html';
     } else {
         alert("Sorry! No Web Storage support");
@@ -59,12 +73,12 @@ function drawScore() {
 
 function drawTimer() {
     if (timer > 0 && resume) {
-        timer = timer - 1;
         ctxInfor.clearRect(0, 0, 100, 200);
         ctxInfor.fillText(timer + " sec", 10, 100, 50);
+        timer--;
     } else if (timer == 0) {
-        if (curScore > localStorage.getItem("highestScore")) {
-            localStorage.setItem("highestScore", curScore);
+        if (curScore > localStorage.getItem("highestScore" + localStorage.getItem("levelSelect"))) {
+            localStorage.setItem("highestScore" + localStorage.getItem("levelSelect"), curScore);
         }
         gameOver(true);
     }
@@ -174,8 +188,20 @@ function gameOver(win) {
     } else {
         level = localStorage.getItem("levelSelect");
     }
+    showScore();
     drawRestart(level);
     drawExit();
+}
+
+function showScore() {
+    ctxGame.save();
+    ctxGame.font = "60px Courier New";
+    ctxGame.fillStyle = "black";
+    ctxGame.fillText("Your Score: " + curScore, 110, 125, 180);
+    var rectangle = new Path2D();
+    rectangle.rect(100, 80, 200, 60);
+    ctxGame.stroke(rectangle);
+    ctxGame.restore();
 }
 
 function drawRestart(level) {
@@ -193,7 +219,9 @@ function drawRestart(level) {
         x = event.pageX - canvasGame.offsetLeft;
         y = event.pageY - canvasGame.offsetTop;
         if (x >= 100 && x <= 300 && y >= 180 && y <= 240) {
+            ctxGame.clearRect(0, 0, 400, 600);
             localStorage.setItem("levelSelect", level);
+            window.removeEventListener('click', restart, false);
             gameStart();
         }
     }
@@ -214,6 +242,7 @@ function drawExit() {
         x = event.pageX - canvasGame.offsetLeft;
         y = event.pageY - canvasGame.offsetTop;
         if (x >= 100 && x <= 300 && y >= 280 && y <= 340) {
+            ctxGame.clearRect(0, 0, 400, 600);
             window.location = "a2.html";
         }
     }
@@ -303,21 +332,21 @@ function Bug() {
     this.getSpeed = function() {
         if (this.color == "black") {
             if (localStorage.getItem("levelSelect") == "level2") {
-                return 2;
+                return 0.2;
             } else {
-                return 1.5;
+                return 0.15;
             }
         } else if (this.color == "red") {
             if (localStorage.getItem("levelSelect") == "level2") {
-                return 1;
+                return 0.1;
             } else {
-                return 0.75;
+                return 0.075;
             }
         } else if (this.color == "orange") {
             if (localStorage.getItem("levelSelect") == "level2") {
-                return 0.8;
+                return 0.08;
             } else {
-                return 0.6;
+                return 0.06;
             }
         }
     }
@@ -459,3 +488,16 @@ canvasGame.addEventListener('click', function(evt) {
     }
 }, false); 
 
+function loadMaxAndSelectLevel() {
+    var level1 = document.getElementById("level1");
+    var level2 = document.getElementById("level2");
+    if (level1.checked) {
+        localStorage.setItem("levelSelect", level1.value);
+    } else if (level2.checked) {
+        localStorage.setItem("levelSelect", level2.value);
+    }
+    
+    var score = document.getElementById("scoreCounter");
+    score.innerHTML = localStorage.getItem("highestScore" + localStorage.getItem("levelSelect")) == null ?
+        0 : localStorage.getItem("highestScore" + localStorage.getItem("levelSelect"));
+}
