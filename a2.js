@@ -23,7 +23,7 @@ gameStart();
 function gameStart() {
     foodList = [];
     bugList = [];
-    timer = 60;
+    timer = 30;
     bugAppear = 0
     curScore = 0
     resume = false;
@@ -72,11 +72,11 @@ function drawScore() {
 }
 
 function drawTimer() {
-    if (timer > 0 && resume) {
+    if (timer >= 0 && resume) {
         ctxInfor.clearRect(0, 0, 100, 200);
         ctxInfor.fillText(timer + " sec", 10, 100, 50);
         timer--;
-    } else if (timer == 0) {
+    } else if (timer < 0) {
         if (curScore > localStorage.getItem("highestScore" + localStorage.getItem("levelSelect"))) {
             localStorage.setItem("highestScore" + localStorage.getItem("levelSelect"), curScore);
         }
@@ -128,7 +128,7 @@ function drawGameView() {
     bugAppear -= 10;
     if (bugAppear <= 0) {
         bugList.push(new Bug());
-        bugAppear = Math.random() * 3000;
+        bugAppear = Math.floor(Math.random() * 3000)+1000;
     }
 
     for (i = 0; i < foodList.length; i++) {
@@ -171,7 +171,7 @@ function drawGameView() {
 function gameOver(win) {
     clearInterval(gameView);
     clearInterval(timerFunc);
-    curScore = 0;
+    
 
     ctxGame.clearRect(0, 0, 400, 600);
 
@@ -188,19 +188,36 @@ function gameOver(win) {
     } else {
         level = localStorage.getItem("levelSelect");
     }
+
+    var imgWin = new Image();
+    imgWin.onload = function() {
+        if (win) {
+            ctxGame.drawImage(imgWin, 55, 0);
+        } 
+    }
+    imgWin.src = 'smilingFace.jpg';
+
+    var imgLose = new Image();
+    imgLose.onload = function() {
+        if (!win) {
+            ctxGame.drawImage(imgLose, 130, 0);
+        } 
+    }
+    imgLose.src = 'cryingFace.jpg';
+
     showScore();
+    curScore = 0;
     drawRestart(level);
     drawExit();
 }
+
+
 
 function showScore() {
     ctxGame.save();
     ctxGame.font = "60px Courier New";
     ctxGame.fillStyle = "black";
-    ctxGame.fillText("Your Score: " + curScore, 110, 125, 180);
-    var rectangle = new Path2D();
-    rectangle.rect(100, 80, 200, 60);
-    ctxGame.stroke(rectangle);
+    ctxGame.fillText("Your Score: " + curScore, 50, 300, 300);
     ctxGame.restore();
 }
 
@@ -208,9 +225,9 @@ function drawRestart(level) {
     ctxGame.save();
     ctxGame.font = "60px Courier New";
     ctxGame.fillStyle = "black";
-    ctxGame.fillText("Restart", 110, 225, 180);
+    ctxGame.fillText("Restart", 110, 425, 180);
     var rectangle = new Path2D();
-    rectangle.rect(100, 180, 200, 60);
+    rectangle.rect(100, 380, 200, 60);
     ctxGame.stroke(rectangle);
     ctxGame.restore();
 
@@ -218,7 +235,7 @@ function drawRestart(level) {
     function restart(event) {
         x = event.pageX - canvasGame.offsetLeft;
         y = event.pageY - canvasGame.offsetTop;
-        if (x >= 100 && x <= 300 && y >= 180 && y <= 240) {
+        if (x >= 100 && x <= 300 && y >= 380 && y <= 440) {
             ctxGame.clearRect(0, 0, 400, 600);
             localStorage.setItem("levelSelect", level);
             window.removeEventListener('click', restart, false);
@@ -231,9 +248,9 @@ function drawExit() {
     ctxGame.save();
     ctxGame.font = "60px Courier New";
     ctxGame.fillStyle = "black";
-    ctxGame.fillText("Exit", 110, 325, 180);
+    ctxGame.fillText("Exit", 127, 525, 180);
     var rectangle = new Path2D();
-    rectangle.rect(100, 280, 200, 60);
+    rectangle.rect(100, 480, 200, 60);
     ctxGame.stroke(rectangle);
     ctxGame.restore();
 
@@ -241,7 +258,7 @@ function drawExit() {
     function exit(event) {
         x = event.pageX - canvasGame.offsetLeft;
         y = event.pageY - canvasGame.offsetTop;
-        if (x >= 100 && x <= 300 && y >= 280 && y <= 340) {
+        if (x >= 100 && x <= 300 && y >= 480 && y <= 540) {
             ctxGame.clearRect(0, 0, 400, 600);
             window.location = "a2.html";
         }
