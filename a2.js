@@ -23,7 +23,7 @@ gameStart();
 function gameStart() {
     foodList = [];
     bugList = [];
-    timer = 30;
+    timer = 60;
     bugAppear = 0
     curScore = 0
     resume = false;
@@ -147,17 +147,13 @@ function drawGameView() {
         for (j = i + 1; j < bugList.length; j++) {
             var bug2 = bugList[j];
             if (bug1.alive && bug2.alive && calcDist(bug1.xCoord, bug1.yCoord, bug2.xCoord, bug2.yCoord) <= 40) {
-                if (bug1.speed < bug2.speed) {
-                    bug1.moveBack();
-                } else if (bug2.speed < bug1.speed) {
-                    bug2.moveBack();
-                } else {
+                if (bug1.speed == bug2.speed) {
                     if (bug1.xCoord < bug2.xCoord) {
                         bug1.moveBack();
                     } else {
                         bug2.moveBack();
                     }
-                }
+                } 
             }
         }
     }
@@ -178,6 +174,7 @@ function gameOver(win) {
     if (win) {
         if (localStorage.getItem("levelSelect") == "level1") {
             localStorage.setItem("levelSelect", "level2");
+
             gameStart();
             return;
         }
@@ -189,6 +186,13 @@ function gameOver(win) {
         level = localStorage.getItem("levelSelect");
     }
 
+    // if (win) {
+    //     levelComplete();
+    // }
+
+    // if (!win) {
+    //     levelFailed();
+    // }
     var imgWin = new Image();
     imgWin.onload = function() {
         if (win) {
@@ -205,12 +209,40 @@ function gameOver(win) {
     }
     imgLose.src = 'cryingFace.jpg';
 
+
     showScore();
     curScore = 0;
     drawRestart(level);
     drawExit();
 }
 
+// function levelFailed() {
+//     ctxGame.save();
+//     ctxGame.font = "80px Verdana";
+//     // Create gradient
+//     var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
+//     gradient.addColorStop("0", "brown");
+//     gradient.addColorStop("0.5", "blue");
+//     gradient.addColorStop("1.0", "green");
+//     // Fill with gradient
+//     ctxGame.fillStyle = gradient;
+//     ctxGame.fillText("Level Failed!", 25, 150, 345);
+//     ctxGame.restore();
+// }
+
+// function levelComplete() {
+//     ctxGame.save();
+//     ctxGame.font = "80px Verdana";
+//     // Create gradient
+//     var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
+//     gradient.addColorStop("0", "magenta");
+//     gradient.addColorStop("0.5", "blue");
+//     gradient.addColorStop("1.0", "red");
+//     // Fill with gradient
+//     ctxGame.fillStyle = gradient;
+//     ctxGame.fillText("Level Complete!", 25, 150, 345);
+//     ctxGame.restore();
+// }
 
 
 function showScore() {
