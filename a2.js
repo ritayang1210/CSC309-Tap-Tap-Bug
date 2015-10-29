@@ -186,29 +186,13 @@ function gameOver(win) {
         level = localStorage.getItem("levelSelect");
     }
 
-    // if (win) {
-    //     levelComplete();
-    // }
-
-    // if (!win) {
-    //     levelFailed();
-    // }
-    var imgWin = new Image();
-    imgWin.onload = function() {
-        if (win) {
-            ctxGame.drawImage(imgWin, 55, 0);
-        } 
+    if (win) {
+        levelComplete();
     }
-    imgWin.src = 'smilingFace.jpg';
 
-    var imgLose = new Image();
-    imgLose.onload = function() {
-        if (!win) {
-            ctxGame.drawImage(imgLose, 130, 0);
-        } 
+    if (!win) {
+        levelFailed();
     }
-    imgLose.src = 'cryingFace.jpg';
-
 
     showScore();
     curScore = 0;
@@ -216,33 +200,33 @@ function gameOver(win) {
     drawExit();
 }
 
-// function levelFailed() {
-//     ctxGame.save();
-//     ctxGame.font = "80px Verdana";
-//     // Create gradient
-//     var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
-//     gradient.addColorStop("0", "brown");
-//     gradient.addColorStop("0.5", "blue");
-//     gradient.addColorStop("1.0", "green");
-//     // Fill with gradient
-//     ctxGame.fillStyle = gradient;
-//     ctxGame.fillText("Level Failed!", 25, 150, 345);
-//     ctxGame.restore();
-// }
+function levelFailed() {
+    ctxGame.save();
+    ctxGame.font = "80px Verdana";
+    // Create gradient
+    var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
+    gradient.addColorStop("0", "brown");
+    gradient.addColorStop("0.5", "blue");
+    gradient.addColorStop("1.0", "green");
+    // Fill with gradient
+    ctxGame.fillStyle = gradient;
+    ctxGame.fillText("Level Failed!", 25, 150, 345);
+    ctxGame.restore();
+}
 
-// function levelComplete() {
-//     ctxGame.save();
-//     ctxGame.font = "80px Verdana";
-//     // Create gradient
-//     var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
-//     gradient.addColorStop("0", "magenta");
-//     gradient.addColorStop("0.5", "blue");
-//     gradient.addColorStop("1.0", "red");
-//     // Fill with gradient
-//     ctxGame.fillStyle = gradient;
-//     ctxGame.fillText("Level Complete!", 25, 150, 345);
-//     ctxGame.restore();
-// }
+function levelComplete() {
+    ctxGame.save();
+    ctxGame.font = "80px Verdana";
+    // Create gradient
+    var gradient = ctxGame.createLinearGradient(0, 0, canvasGame.width, 0);
+    gradient.addColorStop("0", "magenta");
+    gradient.addColorStop("0.5", "blue");
+    gradient.addColorStop("1.0", "red");
+    // Fill with gradient
+    ctxGame.fillStyle = gradient;
+    ctxGame.fillText("Level Complete!", 25, 150, 345);
+    ctxGame.restore();
+}
 
 
 function showScore() {
@@ -550,3 +534,4 @@ function loadMaxAndSelectLevel() {
     score.innerHTML = localStorage.getItem("highestScore" + localStorage.getItem("levelSelect")) == null ?
         0 : localStorage.getItem("highestScore" + localStorage.getItem("levelSelect"));
 }
+
